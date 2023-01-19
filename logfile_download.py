@@ -3,17 +3,23 @@
 import asyncio
 from mavsdk import System
 import sys
+import connect_drone
+from pathlib import Path
+import os
+# downloads_path = str(Path.home() / "Downloads/FlightLogs")
 
 
 async def run():
-    drone = System()
-    await drone.connect(system_address="udp://:14550")
+    # drone = System()
+    # await drone.connect(system_address="udp://:14550")
 
-    print("Waiting for drone to connect...")
-    async for state in drone.core.connection_state():
-        if state.is_connected:
-            print(f"-- Connected to drone!")
-            break
+    # print("Waiting for drone to connect...")
+    # async for state in drone.core.connection_state():
+    #     if state.is_connected:
+    #         print(f"-- Connected to drone!")
+    #         break
+
+    drone = await connect_drone.connect_drone()
 
     entries = await get_entries(drone)
     for entry in entries:
@@ -21,8 +27,10 @@ async def run():
 
 
 async def download_log(drone, entry):
+    downloads_path = os.path.join(str(Path.home() / "Downloads"), "FlightLogs")
+    os.mkdir(downloads_path)
     date_without_colon = entry.date.replace(":", "-")
-    filename = f"logs/log-{date_without_colon}.ulog"
+    filename = f"{downloads_path}/log-{date_without_colon}.ulog"
     print(f"Downloading: log {entry.id} from {entry.date} to {filename}")
     previous_progress = -1
     async for progress in drone.log_files.download_log_file(entry, filename):
