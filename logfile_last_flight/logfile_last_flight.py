@@ -6,16 +6,16 @@ import sys
 import operator
 
 
-async def run():
-    drone = System()
-    await drone.connect(system_address="udp://:14550")
+# async def run():
+#     drone = System()
+#     await drone.connect(system_address="udp://:14550")
 
-    print("Waiting for drone to connect...")
-    async for state in drone.core.connection_state():
-        if state.is_connected:
-            print(f"-- Connected to drone!")
-            break
-    await begin_download(drone)    
+#     print("Waiting for drone to connect...")
+#     async for state in drone.core.connection_state():
+#         if state.is_connected:
+#             print(f"-- Connected to drone!")
+#             break
+#     await begin_download(drone)    
 
 async def begin_download(drone):
     entries = await get_entries(drone)
@@ -46,6 +46,6 @@ async def get_entries(drone):
     return entries
 
 
-if __name__ == "__main__":
-    # Run the asyncio loop
-    asyncio.run(run())
+# if __name__ == "__main__":
+#     # Run the asyncio loop
+#     asyncio.run(run())

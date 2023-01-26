@@ -7,22 +7,24 @@ Simulate a mission where the download of the log starts after mission is complet
 
 import asyncio
 from mavsdk import System
-import logfile_last_flight
+import logs_all_download
+import connect_drone
 
 
 
 async def run():
 
-    drone = System()
-    await drone.connect(system_address="udp://:14550")
+    drone = await connect_drone.connect_drone() 
+    # System()
+    # await drone.connect(system_address="udp://:14550")
 
     status_text_task = asyncio.ensure_future(print_status_text(drone))
 
-    print("Waiting for drone to connect...")
-    async for state in drone.core.connection_state():
-        if state.is_connected:
-            print(f"-- Connected to drone!")
-            break
+    # print("Waiting for drone to connect...")
+    # async for state in drone.core.connection_state():
+    #     if state.is_connected:
+    #         print(f"-- Connected to drone!")
+    #         break
 
     print("Waiting for drone to have a global position estimate...")
     async for health in drone.telemetry.health():
@@ -36,16 +38,22 @@ async def run():
     print("-- Taking off")
     await drone.action.takeoff()
 
-    await asyncio.sleep(10)
+    await asyncio.sleep(5)
 
     print("-- Landing")
     await drone.action.land()
 
-    print('-- Downloading logfile')
-    await logfile_last_flight.begin_download(drone)
+    async with (not drone.action.disarm()):
+        #await start_download(drone)
+        await logs_all_download.begin_download(drone)
+
 
     status_text_task.cancel()
 
+
+
+# async def start_download(drone):
+#     await logs_all_download.begin_download(drone)
 
 
 async def print_status_text(drone):
@@ -56,7 +64,7 @@ async def print_status_text(drone):
         return
 
 
-
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(run())
+    # asyncio.run(run())
