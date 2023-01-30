@@ -7,7 +7,7 @@ Simulate a mission where the download of the log starts after mission is complet
 
 import asyncio
 from mavsdk import System
-import logfile_last_flight
+import logfile_to_flight_review
 
 
 
@@ -42,7 +42,7 @@ async def run():
     await drone.action.land()
 
     print('-- Downloading logfile')
-    await logfile_last_flight.begin_download(drone)
+    await logfile_to_flight_review.begin_download(drone)
 
     status_text_task.cancel()
 
