@@ -1,8 +1,8 @@
 # Environment
-.venv
+.venv/
 
 # settings
-.vscode
+.vscode/
 
 
 .DS_Store
