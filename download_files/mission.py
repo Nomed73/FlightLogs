@@ -7,7 +7,7 @@ Simulate a mission where the download of the log starts after mission is complet
 
 import asyncio
 from mavsdk import System
-import download_logs
+import logs.download_logs as download_logs
 
 
 

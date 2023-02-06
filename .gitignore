@@ -1,10 +1,9 @@
 # Environment
-.venv/
+.venv/*
 
 # settings
-.vscode/
+.vscode/*
 
-
-.DS_Store
+.DS_Store/*
 
 data/*

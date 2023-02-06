@@ -8,7 +8,7 @@ Simulate a mission where the download of the log starts after mission is complet
 import asyncio
 from mavsdk import System
 import logs_all_download
-import connect_drone
+import drone.connect_drone as connect_drone
 
 
 

@@ -3,7 +3,7 @@
 import asyncio
 from mavsdk import System
 import sys
-import connect_drone
+import drone.connect_drone as connect_drone
 from pathlib import Path
 import os
 import operator
