@@ -7,7 +7,7 @@ Simulate a mission where the download of the log starts after mission is complet
 
 import asyncio
 from mavsdk import System
-import logfile_to_flight_review
+import logs.logfile_to_flight_review as logfile_to_flight_review
 
 
 

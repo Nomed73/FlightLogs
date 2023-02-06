@@ -1,0 +1,9 @@
+# Environment
+.venv/*
+
+# settings
+.vscode/*
+
+.DS_Store/*
+
+data/*
