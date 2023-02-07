@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 import asyncio
-from mavsdk import System
-import sys
+import drone.connect_drone as cd
 import operator
-import drone.connect_drone as connect_drone
 import os
+import sys
+
+from mavsdk import System
 from pathlib import Path
 
 # Global constants
@@ -16,7 +17,7 @@ downloads_path = os.path.join(str(Path.home() / "Downloads"), "FlightLogs")
 async def run():
     global downloads_path
 
-    drone = await connect_drone.connect_drone()
+    drone = await cd.connect_drone()
     downloads_path = await create_directory(downloads_path)
     
     print("Waiting for drone to connect...")
@@ -68,7 +69,6 @@ async def download_log(drone, entry):
 
 
 async def upload_to_flight_review(filename):
-    #os.system('python3 /home/nm/developer/PythonSandbox/CodeB/code_b.py')
     flight_review_dir = '/home/nm/developer/FlightReviewApp/flight_review/app'
     os.chdir(flight_review_dir)
     str = 'python3 ./serve.py -f ' + filename
@@ -77,7 +77,7 @@ async def upload_to_flight_review(filename):
 
 
 
-
 if __name__ == "__main__":
     # Run the asyncio loop
+    print('fr main program')
     asyncio.run(run())

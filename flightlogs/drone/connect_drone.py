@@ -2,7 +2,7 @@
 
 import asyncio
 from mavsdk import System
-import sys
+# import sys
 
 async def connect_drone():
     drone = System()
