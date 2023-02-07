@@ -1,26 +1,20 @@
 import asyncio
 from mavsdk import System
+# import ...FlightLogs.drone.connect_drone as connect_drone
+# from ...FlightLogs.drone.connect_drone import connect_drone
+# from .drone.connect_drone import connect_drone
+# import drone.connect_drone as connect_drone
+import drone.connect_drone as cd
+
 
 
 async def run():
 
-    drone = System()
-    await drone.connect(system_address="udp://:14550")
+    drone = await cd.connect_drone()
 
     status_text_task = asyncio.ensure_future(print_status_text(drone))
-
-    print("Waiting for drone to connect...")
-    async for state in drone.core.connection_state():
-        if state.is_connected:
-            print(f"-- Connected to drone!")
-            break
-
-    print("Waiting for drone to have a global position estimate...")
-    async for health in drone.telemetry.health():
-        if health.is_global_position_ok and health.is_home_position_ok:
-            print("-- Global position estimate OK")
-            break
-
+    
+    # Takeoff and land mission starts here
     print("-- Arming")
     await drone.action.arm()
 
@@ -45,5 +39,7 @@ async def print_status_text(drone):
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(run())
+    # loop = asyncio.get_event_loop()
+    # loop.run_until_complete(run())
+    # Run the asyncio loop
+    asyncio.run(run())

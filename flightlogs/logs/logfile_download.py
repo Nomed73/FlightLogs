@@ -3,7 +3,7 @@
 import asyncio
 from mavsdk import System
 import sys
-import drone.connect_drone as connect_drone
+import drone.connect_drone as cd
 from pathlib import Path
 import os
 # downloads_path = str(Path.home() / "Downloads/FlightLogs")
@@ -19,7 +19,7 @@ async def run():
     #         print(f"-- Connected to drone!")
     #         break
 
-    drone = await connect_drone.connect_drone()
+    drone = await cd.connect_drone()
 
     entries = await get_entries(drone)
     for entry in entries:
