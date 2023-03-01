@@ -10,10 +10,10 @@ import time
 def create_csv():
 
     change_dir = '/home/nm/.local/lib/python3.8/site-packages/pyulog/'
-    # data_csv = '-m vehicle_attitude /home/nm/Documents/Testing_uLog_to_csv/log_1_2023-2-27-10-24-30.ulg'
-    get_all = '/home/nm/Documents/Testing_uLog_to_csv/log_1_2023-2-27-10-24-30.ulg'
-    # get_csv = 'python3 ulog2json.py ' + data_csv
-    get_csv = 'python3 ulog2json.py ' + get_all
+    data_csv = '-m vehicle_attitude /home/nm/Documents/Testing_uLog_to_csv/log_1_2023-2-27-10-24-30.ulg'
+    # get_all = '/home/nm/Documents/Testing_uLog_to_csv/log_1_2023-2-27-10-24-30.ulg'
+    get_csv = 'python3 ulog2json.py ' + data_csv
+    # get_csv = 'python3 ulog2json.py ' + get_all
 
 
     os.chdir(change_dir)
