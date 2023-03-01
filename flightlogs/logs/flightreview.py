@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
-import drone.connect_drone as cd
+#import drone.connect_drone as cd
 import operator
 import os
 import sys
@@ -14,7 +14,7 @@ downloads_path = os.path.join(str(Path.home() / "Downloads"), "FlightLogs")
 
 
 
-async def run():
+async def run(cd):
     global downloads_path
 
     drone = await cd.connect_drone()
@@ -69,7 +69,7 @@ async def download_log(drone, entry):
 
 
 async def upload_to_flight_review(filename):
-    flight_review_dir = '/home/nm/developer/FlightReviewApp/flight_review/app'
+    flight_review_dir = '/home/nm/dev/flight_review/app'
     os.chdir(flight_review_dir)
     str = 'python3 ./serve.py -f ' + filename
 
