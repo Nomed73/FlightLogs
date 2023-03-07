@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import asyncio
-#import drone.connect_drone as cd
 import operator
 import os
 import sys
@@ -19,15 +18,7 @@ async def run(cd):
 
     drone = await cd.connect_drone()
     downloads_path = await create_directory(downloads_path)
-    
-    print("Waiting for drone to connect...")
-    async for state in drone.core.connection_state():
-        if state.is_connected:
-            print(f"-- Connected to drone!")
-            break
-    
     await begin_download(drone)    
-
 
 
 async def create_directory(downloads_path):
@@ -36,11 +27,9 @@ async def create_directory(downloads_path):
     return downloads_path
 
 
-
 async def begin_download(drone):
     entries = await get_entries(drone)
     await download_log(drone, entries[0])
-
 
 
 async def get_entries(drone):
@@ -67,14 +56,12 @@ async def download_log(drone, entry):
     await upload_to_flight_review(filename)
 
 
-
 async def upload_to_flight_review(filename):
     flight_review_dir = '/home/nm/dev/flight_review/app'
     os.chdir(flight_review_dir)
-    str = 'python3 ./serve.py -f ' + filename
+    run_flight_review = 'python3 ./serve.py -f ' + filename
 
-    os.system(str)
-
+    os.system(run_flight_review)
 
 
 if __name__ == "__main__":

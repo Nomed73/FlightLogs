@@ -1,4 +1,7 @@
+#!/usr/bin/env python3
 
+# Download the ulog of the last drone (or simulator) flight
+# and and display the data using FreeFlight App
 
 import asyncio
 import logs.flightreview as fr
