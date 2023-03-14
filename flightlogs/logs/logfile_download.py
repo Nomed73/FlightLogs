@@ -10,20 +10,17 @@ import os
 
 
 async def run():
-    # drone = System()
-    # await drone.connect(system_address="udp://:14550")
-
-    # print("Waiting for drone to connect...")
-    # async for state in drone.core.connection_state():
-    #     if state.is_connected:
-    #         print(f"-- Connected to drone!")
-    #         break
-
     drone = await cd.connect_drone()
-
     entries = await get_entries(drone)
     for entry in entries:
         await download_log(drone, entry)
+
+
+async def get_entries(drone):
+    entries = await drone.log_files.get_entries()
+    for entry in entries:
+        print(f"Log {entry.id} from {entry.date}")
+    return entries
 
 
 async def download_log(drone, entry):
@@ -40,13 +37,6 @@ async def download_log(drone, entry):
             sys.stdout.flush()
             previous_progress = new_progress
     print()
-
-
-async def get_entries(drone):
-    entries = await drone.log_files.get_entries()
-    for entry in entries:
-        print(f"Log {entry.id} from {entry.date}")
-    return entries
 
 
 if __name__ == "__main__":
