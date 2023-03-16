@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/home/nm/dev/FlightLogs/venv python3
+
+# usr/bin/env python3
+# path/to/myenv/bin/python3
+
 
 import os
 import csv
@@ -10,6 +14,7 @@ import pytz
 import asyncio
 import datetime
 import operator
+import subprocess
 from pathlib import Path
 from mavsdk import System
 
@@ -33,7 +38,6 @@ async def create_directory():
         os.mkdir(_downloads_path_)
 
 
-
 async def get_entries(drone):
     global _entries_
 
@@ -54,6 +58,7 @@ async def entries_to_list():
     entries_list = []
     for entry in _entries_:
         filename = await rename_file(entry)
+        filename = filename + ' ............ ' + str(round(((entry.size_bytes / 1024) / 1000 ),2))+ " MB"
         entries_list.append(filename)
     return entries_list
 
@@ -62,6 +67,8 @@ async def download_log(drone, index):
     global _downloads_path_, _entries_
 
     entry = _entries_[index]
+    print("entry size = ", entry.size_bytes)
+    print('entry contents = ', entry)
     filename = await rename_file(entry)
     filename = f'{_downloads_path_}/{filename}'
     if not os.path.isfile(filename):
@@ -74,24 +81,20 @@ async def download_log(drone, index):
                 sys.stdout.flush()
                 previous_progress = new_progress
         print()
-        
     return filename
 
 
 async def rename_file(entry):
     date_without_colon = entry.date.replace(":", "-")
     filename = f"log-1-{date_without_colon}.ulg"
-    # filename = f"{_downloads_path_}/log-1-{date_without_colon}.ulog"
     filename = filename.replace('T','-')
     filename = filename.replace('Z','')
-
     return filename
 
 
 async def create_csv(drone, index):
     filename = await download_log(drone, index)
     message_to_download = '-m vehicle_attitude '
-
     # directory where the program is to create the csv
     change_dir = '/home/nm/dev/FlightLogs/venv/lib/python3.8/site-packages/pyulog/'
     data_csv = message_to_download + filename 
@@ -108,36 +111,12 @@ async def create_csv(drone, index):
 async def create_json(drone, index):
     global _downloads_path_, _entries_
 
-    # csv_path = "/home/nm/Documents/Testing_uLog_to_csv/log_1_2023-2-27-10-24-30_vehicle_attitude_0.csv"
-    # json_path = '/home/nm/Documents/Testing_uLog_to_csv/log_1_2023-2-27-10-24-30_vehicle_attitude_0.json'
-
     # check if file has already been downloaded. 
     filename = await rename_file(_entries_[index])
     print('file to search : ', filename)
     print('directory to search:', _downloads_path_)
 
     filename = filename.replace('.ulg', '')
-
-    # matching_files = glob.glob(f"{_downloads_path_}/*{filename}*")
-    # for file in matching_files:
-    #     # print("File in matching_files : ", file)
-    #     # print('file type is :', type(file))
-    #     if '.csv' in file:
-    #         print('csv file found : ', file)
-    #         csv_path = file
-    #         print('csv_path is : ', csv_path)
-            
-    #         break
-    #         # await create_csv(drone, index)
-    #         # await create_json(drone, index)
-    #     else:
-    #         print('csv file not found, will download ', file)
-    #         await create_csv(drone, index)
-            # print('csv downloaded....')
-            # await create_json(drone, index)
-    
-    # csv_path = await create_csv(drone, index)
-    # print('csv path', csv_path)
 
     while (True): 
         csv_path = await get_csv_path(filename)
@@ -177,13 +156,20 @@ async def get_csv_path(filename):
 
 
 async def upload_to_flight_review(drone, index):
+
+    print("\n\n**** IN FLIGHT REVIEW FUNCTION ****\n\n")
+    print("Current Directory : ", os.getcwd())
+    curr_dir = os.getcwd()
     filename = await download_log(drone, index)
+    print('file name in upload to flight review function : ', filename)
     flight_review_dir = '/home/nm/dev/flight_review/app'
+    
     os.chdir(flight_review_dir)
-    run_flight_review = 'python3 ./serve.py -f ' + filename
-    os.system(run_flight_review)
-    return "Done"
-    # return True
+    print("Current Directory : ", os.getcwd())
+    cmd = ['python3', './serve.py', '-f', filename]
+    result = subprocess.Popen(cmd)
+    os.chdir(curr_dir)   
+    return result
 
 
 # TODO: Remove this function, it is not being used anywhere 

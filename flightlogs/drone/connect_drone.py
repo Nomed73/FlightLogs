@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/home/nm/dev/FlightLogs/venv python3
+# - /usr/bin/env python3
 
 import asyncio
 from mavsdk import System
