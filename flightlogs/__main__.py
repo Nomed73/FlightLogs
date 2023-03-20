@@ -25,16 +25,16 @@ async def main():
     # create the layout for the gui
     window = sg.Window("Drone Connect", 
                         lt.layout_vert,
-                        size=(800,400), 
-                        margins=(25, 25), 
+                        size=(800,600), 
+                        margins=(15, 15), 
                         resizable=True, 
                         element_justification='left')
 
     # # Verify that the px4 and sim are running
-    # if await launch_px4() == 0:
-    #     drone = await cd.connect_drone()
-    # else:
-    #     print('drone not connected')
+    if await launch_px4() == 0:
+        drone = await cd.connect_drone()
+    else:
+        print('drone not connected')
 
     while True:
         event, values = window.read()
@@ -56,17 +56,20 @@ async def main():
         elif event == '-SAVE LOG-':
             selected_item = values['-LOG LIST-'][0]
             index_log = logs.index(selected_item)
-            log = await fr.download_log(drone, index_log)
+            window['-SAVE LOG-'].update(visible=True)
+            log = await fr.download_log(drone, index_log, window)
 
         elif event == '-TO CSV-':
             selected_item = values['-LOG LIST-'][0]
             index_log = logs.index(selected_item)
+            window['-SAVE LOG-'].update(visible=True)
             await fr.create_csv(drone, index_log)
             pass 
 
         elif event == '-TO JSON-':
             selected_item = values['-LOG LIST-'][0]
             index_log = logs.index(selected_item)
+            window['-SAVE LOG-'].update(visible=True)
             await fr.create_json(drone, index_log)
             pass
 
@@ -79,7 +82,7 @@ async def main():
             index_log = logs.index(selected_item)
             window['-CHECK BROWSER-'].update(visible=True)
             # await fr.upload_to_flight_review(drone, index_log)
-            result = await fr.upload_to_flight_review(drone, index_log)
+            result = await fr.upload_to_flight_review(drone, index_log,window)
             print(result)
             # if enable_notice:
             #     window['-CHECK BROWSER-'].update(visible=True)
