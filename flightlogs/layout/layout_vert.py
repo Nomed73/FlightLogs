@@ -113,10 +113,12 @@ bv_pad_l=0
 bv_pad_r = 5
 bv_pad_t = 5
 bv_pad_b = 5
+button_style = f'size=({bv_w} , {bv_h}), pad=(({bv_pad_l},{bv_pad_r}),({bv_pad_t}, {bv_pad_b}))'
 
 buttons_vert = [
     # [sg.Button("Show Logs", size=(bh_w , b_height), pad=((b_pad_left,0),(0,0)), key = '-SHOW LOGS-', disabled=False)], 
     [sg.Text('Options', size=(bv_w , bv_h), pad=((bv_pad_l,bv_pad_r),(bv_pad_t, bv_pad_b)), justification='left')],
+    # [sg.Button("Show Logs", button_style, key = '-SHOW LOGS-', disabled=False)], 
     [sg.Button("Show Logs", size=(bv_w , bv_h),  pad=((bv_pad_l,bv_pad_r),(bv_pad_t, bv_pad_b)), key = '-SHOW LOGS-', disabled=False)], 
     [sg.Button('Save log', size=(bv_w , bv_h),  pad=((bv_pad_l,bv_pad_r),(bv_pad_t, bv_pad_b)), key = '-SAVE LOG-', disabled=True)],
     [sg.Button('Save as CSV', size=(bv_w , bv_h),  pad=((bv_pad_l,bv_pad_r),(bv_pad_t, bv_pad_b)), key = '-TO CSV-', disabled=True)],
@@ -128,8 +130,7 @@ buttons_vert = [
     [sg.Button('View Flight Review', size=(bv_w , bv_h),  pad=((bv_pad_l,bv_pad_r),(bv_pad_t, bv_pad_b)), key = '-FLIGHT REVIEW-', disabled=True)],
     [sg.Text('Flight Review will open in browser', visible=False, key = '-CHECK BROWSER-')],
     # [sg.Button('Delete all logs', key = '-DELETE LOGS-')],  
-    [sg.Button('Exit', size=(bv_w , bv_h),  pad=((bv_pad_l,bv_pad_r),(bv_pad_t+15, bv_pad_b-5)), key = '-EXIT-')], 
-    
+    [sg.Button('Exit', size=(bv_w , bv_h),  pad=((bv_pad_l,bv_pad_r),(bv_pad_t+15, bv_pad_b-5)), key = '-EXIT-')],    
 ]
 
 
@@ -151,7 +152,15 @@ file_view = [
 
 status_view = [
     [sg.Text('Status...')],
-    [sg.Text('All files saved in ../Downloads/FlightLogs/')],
+    [sg.Text('All files saved in ../Downloads/FlightLogs/', visible=False, key='-SAVE LOC-')],
+]
+
+progress_bar= [
+    [sg.ProgressBar(100, orientation='h', bar_color=('blue', 'white'), expand_x=True, size=(40, 20),  key='-PBAR-')],
+    [
+        sg.Text('', key='-OUT-', enable_events=True, font=('Arial Bold', 12), justification='left'),
+        sg.Text('%', font=('Arial Bold', 12), justification='left'),
+    ]
 ]
 
 
@@ -161,19 +170,10 @@ layout_vert = [
         sg.Column(buttons_vert, expand_y=True, vertical_alignment = 'top', key = '-SELECTIONS-'),
         sg.VSeparator(),
         sg.Column(file_view, vertical_alignment = 'top'),
-        
-        
-        
-        
     ],
-    [sg.HorizontalSeparator()],
-    [
-        sg.Column(status_view)
-    ],
-    # [
-    #     sg.Button('Exit', size=(b_width, b_height), pad=((b_pad_left,0),(0,0)), key = '-EXIT-')
-    # ], 
-
+    [ sg.HorizontalSeparator() ],
+    [ sg.Column(status_view) ],
+    [ sg.Column(progress_bar) ],
 ]
 
 

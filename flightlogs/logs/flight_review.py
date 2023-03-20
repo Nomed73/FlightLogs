@@ -20,7 +20,8 @@ import layout.layout_vert as lt
 from pathlib import Path
 from mavsdk import System
 
-
+class flight_review():
+    
 # Global constants
 _downloads_path_ = os.path.join(str(Path.home() / "Downloads"), "FlightLogs")
 _entries_ = {}
@@ -160,12 +161,12 @@ async def get_csv_path(filename):
     return csv_path
 
 
-async def upload_to_flight_review(drone, index, window):
+async def upload_to_flight_review(drone, index):
 
     print("\n\n**** IN FLIGHT REVIEW FUNCTION ****\n\n")
     print("Current Directory : ", os.getcwd())
     curr_dir = os.getcwd()
-    filename = await download_log(drone, index, window)
+    filename = await download_log(drone, index)
     print('file name in upload to flight review function : ', filename)
     flight_review_dir = '/home/nm/dev/flight_review/app'
     
