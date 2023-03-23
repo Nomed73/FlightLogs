@@ -20,7 +20,6 @@ import layout.layout_vert as lt
 from pathlib import Path
 from mavsdk import System
 
-class flight_review():
     
 # Global constants
 _downloads_path_ = os.path.join(str(Path.home() / "Downloads"), "FlightLogs")
