@@ -16,7 +16,7 @@ from pathlib import Path
 async def launch_px4():
     # Launch the PX4 simulator
     px4_directory = '/home/nm/dev/PX4-Autopilot'
-    run_px4 = f'cd {px4_directory} && HEADLESS=1 make px4_sitl jmavsim'
+    run_px4 = f'cd {px4_directory} && HEADLESS = 1 make px4_sitl jmavsim'
     px4_process = subprocess.call(['gnome-terminal', '--', 'bash', '-c', run_px4])
     return px4_process
 
@@ -31,10 +31,23 @@ async def main():
                         element_justification='left')
 
     # # Verify that the px4 and sim are running
-    if await launch_px4() == 0:
-        drone = await cd.connect_drone()
-    else:
-        print('drone not connected')
+    # if await launch_px4() == 0:
+    #     drone = await cd.connect_drone()
+    # else:
+    #     print('drone not connected')
+
+    # Connect to drone
+    drone = await cd.connect_drone()
+    
+    # Retrieve the system name parameter as a ParamValue object
+    # system_name = drone.__dict__[
+    # for key in system_name:
+    #     print("\n",key, " : ", system_name[key])
+    # print(drone.__dict__[mavsdk_server_address])
+
+    # print("Drone name:", system_name)
+    # print(f'Attempting to connect to drone : ')
+    # drone = await cd.connect_drone()
 
     while True:
         event, values = window.read()
