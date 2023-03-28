@@ -11,7 +11,7 @@ ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 # Server info
 host = '192.168.0.113'
-port = 22
+port_use = 22
 user = 'root'
 passwd = 'oelinux123'
 
@@ -30,8 +30,6 @@ ssh.connect(hostname = host, username = user, password = passwd)
     
 
 
-
-
 # if __name__ == "__main__":
 #     # Run the asyncio loop
 #     asyncio.run(connect_drone())
@@ -40,27 +38,27 @@ ssh.connect(hostname = host, username = user, password = passwd)
 # open an ftp connection with px4
 sftp_client = ssh.open_sftp()
 
-# # list the operations that exist in the client
-# print('\ndir(sftp_client) : ')
-# print(dir(sftp_client))
+# list the operations that exist in the client
+print('\ndir(sftp_client) : ')
+print(dir(sftp_client))
 
-# # get current working directorycd _log
-# print("\nlistdir : ")
-# print(sftp_client.listdir() )
+# get current working directorycd _log
+print("\nlistdir : ")
+print(sftp_client.listdir() )
 
 #
-print("\nCurrent directory : ")
-print(sftp_client.getcwd())
+# print("\nCurrent directory : ")
+# print(sftp_client.getcwd())
 
-# creates an interactive shell via wifi
-while True:
-    try: 
-        cmd = input('$> ')
-        if cmd == 'exit' : break
-        stdin, stdout, stderr = ssh.exec_command(cmd)
-        print(stdout.read().decode())
-    except KeyboardInterrupt:    
-        break
+# # creates an interactive shell via wifi
+# while True:
+#     try: 
+#         cmd = input('$> ')
+#         if cmd == 'exit' : break
+#         stdin, stdout, stderr = ssh.exec_command(cmd)
+#         print(stdout.read().decode())
+#     except KeyboardInterrupt:    
+#         break
 
 # stdin, stdout, stderr = ssh.exec_command('ls -a')
 # print(stdout.read().decode())
