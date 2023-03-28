@@ -3,9 +3,12 @@
 
 # Download the ulog of the last drone (or simulator) flight
 # and and display the data using FreeFlight App
+
 import asyncio
-import subprocess
 import PySimpleGUI as sg
+import subprocess
+import psutil
+# import logs.log_paths
 import layout.layout_vert as lt
 import logs.flightreview as fr
 import drone.connect_drone as cd
@@ -16,7 +19,7 @@ from pathlib import Path
 async def launch_px4():
     # Launch the PX4 simulator
     px4_directory = '/home/nm/dev/PX4-Autopilot'
-    run_px4 = f'cd {px4_directory} && HEADLESS = 1 make px4_sitl jmavsim'
+    run_px4 = f'cd {px4_directory} &&  make px4_sitl jmavsim'
     px4_process = subprocess.call(['gnome-terminal', '--', 'bash', '-c', run_px4])
     return px4_process
 
@@ -30,29 +33,36 @@ async def main():
                         resizable=True, 
                         element_justification='left')
 
-    # # Verify that the px4 and sim are running
+    # Verify that the px4 and sim are running
     # if await launch_px4() == 0:
     #     drone = await cd.connect_drone()
     # else:
-    #     print('drone not connected')
+    #     print('drone not connected
 
     # Connect to drone
     drone = await cd.connect_drone()
-    
-    # Retrieve the system name parameter as a ParamValue object
-    # system_name = drone.__dict__[
-    # for key in system_name:
-    #     print("\n",key, " : ", system_name[key])
-    # print(drone.__dict__[mavsdk_server_address])
 
-    # print("Drone name:", system_name)
-    # print(f'Attempting to connect to drone : ')
-    # drone = await cd.connect_drone()
 
     while True:
-        event, values = window.read()
+        event, values = window.read() # type: ignore
 
         if event == "-EXIT-" or event == sg.WIN_CLOSED:
+            processes = psutil.process_iter()
+            for process in processes:
+                description = str(process.cmdline())
+                try:
+                    if "PX4" in description:
+                        print(f'PX4 process: \t\t{description}')
+                        process.kill()
+                    if "jmavsim" in description:
+                        print(f'jmavsim process: \t{description}')
+                        process.kill()
+                    if "FlightLogs" in description:
+                        print(f'FlightLogs process: \t{description}') 
+                        process.kill()
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    pass
+            
             break
     
         if event == '-SHOW LOGS-':
@@ -70,7 +80,7 @@ async def main():
             selected_item = values['-LOG LIST-'][0]
             index_log = logs.index(selected_item)
             window['-SAVE LOG-'].update(visible=True)
-            log = await fr.download_log(drone, index_log, window)
+            log = await fr.download_log(drone, index_log)
 
         elif event == '-TO CSV-':
             selected_item = values['-LOG LIST-'][0]
@@ -95,7 +105,7 @@ async def main():
             index_log = logs.index(selected_item)
             window['-CHECK BROWSER-'].update(visible=True)
             # await fr.upload_to_flight_review(drone, index_log)
-            result = await fr.upload_to_flight_review(drone, index_log,window)
+            result = await fr.upload_to_flight_review(drone, index_log)
             print(result)
             # if enable_notice:
             #     window['-CHECK BROWSER-'].update(visible=True)
@@ -112,6 +122,8 @@ async def main():
 
     # else:
     #     print('Connecting to drone failed.')
+
+
 
     window.close()
 

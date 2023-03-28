@@ -13,13 +13,14 @@ import time
 import pytz
 import asyncio
 import datetime
+import signal
 import operator
 import subprocess
 import PySimpleGUI as sg
 import layout.layout_vert as lt
 from pathlib import Path
 from mavsdk import System
-
+from logs import log_paths
 
 # Global constants
 _downloads_path_ = os.path.join(str(Path.home() / "Downloads"), "FlightLogs")
@@ -65,28 +66,64 @@ async def entries_to_list():
     return entries_list
 
 
-async def download_log(drone, index, window):
+async def download_log(drone, index):
     global _downloads_path_, _entries_
-    
 
+    ulog_path = await log_paths.get_ulogs(drone, index)
     entry = _entries_[index]
-    print("entry size = ", entry.size_bytes)
-    print('entry contents = ', entry)
     filename = await rename_file(entry)
-    filename = f'{_downloads_path_}/{filename}'
-    if not os.path.isfile(filename):
-        print(f"Downloading: log {entry.id} from {entry.date} to {filename}")
-        previous_progress = -1
-        async for progress in drone.log_files.download_log_file(entry, filename):
-            new_progress = round(progress.progress*100)
-            if new_progress != previous_progress:
-                window['-PBAR-'].update(new_progress)
-                window['-OUT-'].update(new_progress)
-                sys.stdout.write(f"\r{new_progress} %")
-                sys.stdout.flush()
-                previous_progress = new_progress
-        print()
-    return filename
+
+    #THIS FUCKING WORKS - CLEAN THIS UP
+    password = 'oelinux123'
+    ulog_path = '/data/px4/log/'+ulog_path
+    ip_address = '192.168.0.113'
+    ulog_path_and_name = _downloads_path_ + '/' +filename
+
+    if not os.path.isfile(ulog_path_and_name):
+        # run_scp = f'sshpass -p {password} scp -r root@{ip_address}:{ulog_path} {ulog_path_and_name}'
+        # download_process = subprocess.call(['gnome-terminal', '--', 'bash', '-c',run_scp])
+   
+
+        # TESTING FOR ASYNC DOWNLOAD 
+
+
+
+
+        server_ulog = f'root@{ip_address}:{ulog_path}'
+        cmd = f'sshpass -p {password} scp -r'
+        command = [cmd, server_ulog, ulog_path_and_name]
+
+
+
+        sshpass_command = ['sshpass', '-p', 'oelinux123', 'scp', '-r', server_ulog, ulog_path_and_name]
+        process = await asyncio.create_subprocess_exec(*sshpass_command)
+        await process.wait()
+
+        # Kill the process above, required so that process can be used again with another ulog
+        os.kill(process.pid, signal.SIGTERM)
+
+
+
+    # #Works but very slow
+    # entry = _entries_[index]
+    # print("entry size = ", entry.size_bytes)
+    # print('entry contents = ', entry)
+    # filename = await rename_file(entry)
+    # filename = f'{_downloads_path_}/{filename}'
+    # if not os.path.isfile(filename):
+    #     print(f"Downloading: log {entry.id} from {entry.date} to {filename}")
+    #     previous_progress = -1
+    #     async for progress in drone.log_files.download_log_file(entry, filename):
+    #         new_progress = round(progress.progress*100)
+    #         if new_progress != previous_progress:
+    #             window['-PBAR-'].update(new_progress)
+    #             window['-OUT-'].update(new_progress)
+    #             sys.stdout.write(f"\r{new_progress} %")
+    #             sys.stdout.flush()
+    #             previous_progress = new_progress
+    #     print()
+
+    return ulog_path_and_name
 
 
 async def rename_file(entry):
@@ -160,12 +197,12 @@ async def get_csv_path(filename):
     return csv_path
 
 
-async def upload_to_flight_review(drone, index, window):
+async def upload_to_flight_review(drone, index):
 
     print("\n\n**** IN FLIGHT REVIEW FUNCTION ****\n\n")
     print("Current Directory : ", os.getcwd())
     curr_dir = os.getcwd()
-    filename = await download_log(drone, index, window)
+    filename = await download_log(drone, index)
     print('file name in upload to flight review function : ', filename)
     flight_review_dir = '/home/nm/dev/flight_review/app'
     
@@ -178,12 +215,12 @@ async def upload_to_flight_review(drone, index, window):
 
 
 # TODO: Remove this function, it is not being used anywhere 
-async def file_exists(filename):
-    path = '/path/to/directory/example.txt'
-    if os.path.isfile(path):
-        print('File exists')
-    else:
-        print('File does not exist')
+# async def file_exists(filename):
+#     path = '/path/to/directory/example.txt'
+#     if os.path.isfile(path):
+#         print('File exists')
+#     else:
+        # print('File does not exist')
 
 
 # TODO: Have to find the right spot to put this, so that names have CST
@@ -207,10 +244,6 @@ async def zulu_to_cst(zulu_time_str):
     print(f'Central time: {cst_time}')
     return cst_time
 
-
-# TODO: function is here to show that layout window was passed as a parameter to this file
-async def test_update_window(window):
-    window['-SHOW LOGS-'].update(disabled = True)
 
 if __name__ == "__main__":
     # Run the asyncio loop
