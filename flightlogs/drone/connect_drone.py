@@ -1,9 +1,14 @@
 #!/home/nm/dev/FlightLogs/venv python3
-# - /usr/bin/env python3
+
+'''
+Creates a udp connection to the voxl/px4 on the 14550 port. 
+returns the connected drone to __main__.py
+'''
 
 import asyncio
+
 from mavsdk import System
-# import sys
+
 
 async def connect_drone():
 
@@ -16,7 +21,6 @@ async def connect_drone():
             print(f"-- Connected to drone!")
             break
     
-    print('Drone = ', drone)
     return drone
 
 

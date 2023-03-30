@@ -1,7 +1,8 @@
 #!/home/nm/dev/FlightLogs/venv python3
 
-# usr/bin/env python3
-# path/to/myenv/bin/python3
+'''
+
+'''
 
 
 import os
@@ -9,17 +10,19 @@ import csv
 import sys
 import glob
 import json
-import time
+# import time
 import pytz
 import asyncio
 import datetime
-import signal
+# import signal
 import operator
 import subprocess
-import PySimpleGUI as sg
-import layout.layout_vert as lt
+
+# import PySimpleGUI as sg
 from pathlib import Path
-from mavsdk import System
+# from mavsdk import System
+
+import layout.layout_vert as lt
 from logs import log_paths
 
 # Global constants
@@ -28,6 +31,7 @@ _entries_ = {}
 
 
 async def run(drone):
+    # creates download directory and retrieves ulog entries 
     global _downloads_path_, _entries_
     
     await create_directory()
@@ -35,6 +39,8 @@ async def run(drone):
 
 
 async def create_directory():
+    # Creates the directory for downloads if it does not already exist
+
     global _downloads_path_
 
     if( not os.path.exists(_downloads_path_)):
@@ -42,6 +48,8 @@ async def create_directory():
 
 
 async def get_entries(drone):
+    # Retrieves the ulogs from the drone and sorts them from recent to oldest
+    
     global _entries_
 
     _entries_ = await drone.log_files.get_entries()
@@ -49,6 +57,8 @@ async def get_entries(drone):
 
 
 async def download_all_logs(drone):
+    # Download all ulogs in drone
+    
     global _entries_
 
     for entry in _entries_:
@@ -56,6 +66,8 @@ async def download_all_logs(drone):
     
 
 async def entries_to_list():
+    # Gets the list of ulogs and creates a list to be displayed in the GUI
+    
     global _entries_
 
     entries_list = []
@@ -67,90 +79,34 @@ async def entries_to_list():
 
 
 async def download_log(drone, index):
+    # Downloads the selected ulog to the Downloads/FlightLogs/ directory
+    
     global _downloads_path_, _entries_
 
     ulog_path = await log_paths.get_ulogs(drone, index)
     entry = _entries_[index]
     filename = await rename_file(entry)
 
-    #THIS FUCKING WORKS - CLEAN THIS UP
+   # Login information for the PX4, this information may have to change depending on users information. 
+    user = 'root'
     password = 'oelinux123'
     ulog_path = '/data/px4/log/'+ulog_path
     ip_address = '192.168.0.113'
     ulog_path_and_name = _downloads_path_ + '/' +filename
-    server_ulog = f'root@{ip_address}:{ulog_path}'
+    server_ulog = f'{user}@{ip_address}:{ulog_path}'
 
     if not os.path.isfile(ulog_path_and_name):
-        # run_scp = f'sshpass -p {password} scp -r root@{ip_address}:{ulog_path} {ulog_path_and_name}'
-        # download_process = subprocess.call(['gnome-terminal', '--', 'bash', '-c',run_scp])
-        
-        
-        # print("calling rsync_download()")
-        # rsync_download(server_ulog, ulog_path_and_name)
-        # # TESTING RSYNC for progress bar 
-        # # command = ['rsync', '-a', '--progress', '--no-inc-recursive', server_ulog, ulog_path_and_name]
-        # # process = await asyncio.subprocess.create_subprocess_exec(*command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        # # if process.stdout is not None:
-        # #     async for line in process.stdout:
-        #         progress_line = line.strip()
-        #         if line in progress_line:
-        #             print(line)
-        #             yield line
-        # await process.communicate()
-        # await process.wait()
-
-        # TESTING FOR ASYNC DOWNLOAD - using SCP - WORKS 
-        # server_ulog = f'root@{ip_address}:{ulog_path}'
-        # cmd = f'sshpass -p {password} scp -r'
-        # command = [cmd, server_ulog, ulog_path_and_name]
-        sshpass_command = ['sshpass', '-p', 'oelinux123', 'scp', '-r', server_ulog, ulog_path_and_name]
+        # Download ulog via scp
+        sshpass_command = ['sshpass', '-p', password, 'scp', '-r', server_ulog, ulog_path_and_name]
         process = await asyncio.create_subprocess_exec(*sshpass_command)
-        # Check what process. has that can be used for progress bar
         await process.wait()
-
-        # Kill the process above, required so that process can be used again with another ulog
-        # os.kill(process.pid, signal.SIGTERM)
-
-
-
-    # #Works but very slow
-    # entry = _entries_[index]
-    # print("entry size = ", entry.size_bytes)
-    # print('entry contents = ', entry)
-    # filename = await rename_file(entry)
-    # filename = f'{_downloads_path_}/{filename}'
-    # if not os.path.isfile(filename):
-    #     print(f"Downloading: log {entry.id} from {entry.date} to {filename}")
-    #     previous_progress = -1
-    #     async for progress in drone.log_files.download_log_file(entry, filename):
-    #         new_progress = round(progress.progress*100)
-    #         if new_progress != previous_progress:
-    #             window['-PBAR-'].update(new_progress)
-    #             window['-OUT-'].update(new_progress)
-    #             sys.stdout.write(f"\r{new_progress} %")
-    #             sys.stdout.flush()
-    #             previous_progress = new_progress
-    #     print()
 
     return ulog_path_and_name
 
-# async def rsync_download(source, destination):
-#         print("rsync_download function")
-#         # TESTING RSYNC for progress bar 
-#         # server_ulog = f'root@{ip_address}:{ulog_path}'
-#         command = sshpass_command = ['sshpass', '-p', 'oelinux123', 'scp', '-r', source, destination]
-#         # command = ['rsync', '-r', '--progress', '-e', 'ssh', source, destination]
-#         process = await asyncio.subprocess.create_subprocess_exec(*command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-#         if process.stdout is not None:
-#             async for line in process.stdout:
-#                 progress_line = line.strip()
-#                 if line in progress_line:
-#                     print(line)
-#                     yield line
-#         await process.communicate()
-
 
 async def rename_file(entry):
+    #renames ulog for consistency 
+
     date_without_colon = entry.date.replace(":", "-")
     filename = f"log-1-{date_without_colon}.ulg"
     filename = filename.replace('T','-')
@@ -159,31 +115,27 @@ async def rename_file(entry):
 
 
 async def create_csv(drone, index):
+    # Creates and downloads a csv document that includes the message_to_download data
+
     filename = await download_log(drone, index)
     message_to_download = '-m vehicle_attitude '
-    # directory where the program is to create the csv
+    
+    # Change of directory to execute functions that converts the ulog to csv
     change_dir = '/home/nm/dev/FlightLogs/venv/lib/python3.8/site-packages/pyulog/'
     data_csv = message_to_download + filename 
     get_csv = 'python3 ulog2csv.py ' + data_csv
-    
-    #TODO: Remove when the program is done. 
-    print('filename = ', filename)
- 
     os.chdir(change_dir)
     os.system(get_csv)
 
 
-
 async def create_json(drone, index):
+    # Converts and downloads the csv file to a json file.
+
     global _downloads_path_, _entries_
 
     # check if file has already been downloaded. 
     filename = await rename_file(_entries_[index])
-    print('file to search : ', filename)
-    print('directory to search:', _downloads_path_)
-
     filename = filename.replace('.ulg', '')
-
     while (True): 
         csv_path = await get_csv_path(filename)
         if csv_path == '':
@@ -192,12 +144,9 @@ async def create_json(drone, index):
             break
 
     json_path = csv_path.replace('.csv', '.json')
-
     data = {}
-
     with open(csv_path, encoding = 'utf-8') as csvf:
         csvReader = csv.DictReader(csvf)
-
         for rows in csvReader:
             key = rows['timestamp']
             data[key] = rows
@@ -211,45 +160,30 @@ async def get_csv_path(filename):
     csv_path = ''
     matching_files = glob.glob(f"{_downloads_path_}/*{filename}*")
     for file in matching_files:
-        # print("File in matching_files : ", file)
-        # print('file type is :', type(file))
         if '.csv' in file:
-            print('csv file found : ', file)
             csv_path = file
-            print('csv_path is : ', csv_path)
 
     return csv_path
 
 
 async def upload_to_flight_review(drone, index):
+    # Downloads the selected ulog and displays the data in local build of Flight Review.
+    # flight_review_directory path to local installation path
 
-    print("\n\n**** IN FLIGHT REVIEW FUNCTION ****\n\n")
-    print("Current Directory : ", os.getcwd())
     curr_dir = os.getcwd()
     filename = await download_log(drone, index)
-    print('file name in upload to flight review function : ', filename)
     flight_review_dir = '/home/nm/dev/flight_review/app'
-    
     os.chdir(flight_review_dir)
-    print("Current Directory : ", os.getcwd())
     cmd = ['python3', './serve.py', '-f', filename]
     result = subprocess.Popen(cmd)
     os.chdir(curr_dir)   
     return result
 
 
-# TODO: Remove this function, it is not being used anywhere 
-# async def file_exists(filename):
-#     path = '/path/to/directory/example.txt'
-#     if os.path.isfile(path):
-#         print('File exists')
-#     else:
-        # print('File does not exist')
-
-
 # TODO: Have to find the right spot to put this, so that names have CST
 async def zulu_to_cst(zulu_time_str):
-    # create a datetime object representing the Zulu time
+    # Converts zulu time zone to central time zone.
+
     print(f'Zulu time: {zulu_time_str}')
     temp = zulu_time_str.replace('T', ' ')
     temp = temp.replace('Z', '')
