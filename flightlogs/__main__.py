@@ -17,6 +17,7 @@ from pathlib import Path
 
 
 async def launch_px4():
+    #TODO : Remove this function if we will not be connecting to the simulator
     # Launch the PX4 simulator
     px4_directory = '/home/nm/dev/PX4-Autopilot'
     run_px4 = f'cd {px4_directory} &&  make px4_sitl jmavsim'
@@ -33,41 +34,36 @@ async def main():
                         resizable=True, 
                         element_justification='left')
 
+    #TODO : Remove if simulator will not be needed.
     # Verify that the px4 and sim are running
     # if await launch_px4() == 0:
     #     drone = await cd.connect_drone()
     # else:
     #     print('drone not connected
 
-    # Connect to drone
+    # Connect to drone - Initiate before window creation.
     drone = await cd.connect_drone()
-
+    await fr.run(drone)
 
     while True:
         event, values = window.read() # type: ignore
 
         if event == "-EXIT-" or event == sg.WIN_CLOSED:
+            #Kills any possible running processes before exiting
             processes = psutil.process_iter()
             for process in processes:
                 description = str(process.cmdline())
                 try:
-                    if "PX4" in description:
-                        print(f'PX4 process: \t\t{description}')
-                        process.kill()
-                    if "jmavsim" in description:
-                        print(f'jmavsim process: \t{description}')
-                        process.kill()
-                    if "FlightLogs" in description:
-                        print(f'FlightLogs process: \t{description}') 
-                        process.kill()
+                    if "PX4" in description: process.kill()
+                    if "jmavsim" in description: process.kill()
+                    if "FlightLogs" in description: process.kill()
+                    if "scp" in description: process.kill()
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     pass
-            
             break
-    
-        if event == '-SHOW LOGS-':
-            # await fr.test_update_window(window)
-            await fr.run(drone)
+
+        if event == '-CONNECT-':
+            #Connect the drone and list the files on the drone and enable buttons.
             logs = await fr.entries_to_list() 
             window['-LOG LIST-'].update(values = logs)
             window['-SAVE LOG-'].update(disabled = False)
@@ -75,27 +71,31 @@ async def main():
             window['-TO JSON-'].update(disabled = False)
             window['-FLIGHT REVIEW-'].update(disabled = False)
             window['-ULOGS-'].update(visible=True)
-        
+            pass
+
         elif event == '-SAVE LOG-':
+
             selected_item = values['-LOG LIST-'][0]
             index_log = logs.index(selected_item)
+            print('index_log = ', index_log, "index_log type = ", type(index_log))
             window['-SAVE LOG-'].update(visible=True)
             log = await fr.download_log(drone, index_log)
-
+            window['-DONE-'].update(visible=True)
+            
         elif event == '-TO CSV-':
             selected_item = values['-LOG LIST-'][0]
             index_log = logs.index(selected_item)
             window['-SAVE LOG-'].update(visible=True)
+            # window['-DOWNLOADING-'].update(visible=True)
             await fr.create_csv(drone, index_log)
-            pass 
-
+            
         elif event == '-TO JSON-':
             selected_item = values['-LOG LIST-'][0]
             index_log = logs.index(selected_item)
             window['-SAVE LOG-'].update(visible=True)
+            # window['-DOWNLOADING-'].update(visible=True)
             await fr.create_json(drone, index_log)
-            pass
-
+            
         elif event == '-FLIGHT REVIEW-':
             #TODO Remove the print line
             print("Flight Review initiated...")
@@ -104,6 +104,7 @@ async def main():
             selected_item = values['-LOG LIST-'][0]
             index_log = logs.index(selected_item)
             window['-CHECK BROWSER-'].update(visible=True)
+            # window['-DOWNLOADING-'].update(visible=True)
             # await fr.upload_to_flight_review(drone, index_log)
             result = await fr.upload_to_flight_review(drone, index_log)
             print(result)

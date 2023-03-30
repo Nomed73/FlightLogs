@@ -78,29 +78,38 @@ async def download_log(drone, index):
     ulog_path = '/data/px4/log/'+ulog_path
     ip_address = '192.168.0.113'
     ulog_path_and_name = _downloads_path_ + '/' +filename
+    server_ulog = f'root@{ip_address}:{ulog_path}'
 
     if not os.path.isfile(ulog_path_and_name):
         # run_scp = f'sshpass -p {password} scp -r root@{ip_address}:{ulog_path} {ulog_path_and_name}'
         # download_process = subprocess.call(['gnome-terminal', '--', 'bash', '-c',run_scp])
-   
+        
+        
+        # print("calling rsync_download()")
+        # rsync_download(server_ulog, ulog_path_and_name)
+        # # TESTING RSYNC for progress bar 
+        # # command = ['rsync', '-a', '--progress', '--no-inc-recursive', server_ulog, ulog_path_and_name]
+        # # process = await asyncio.subprocess.create_subprocess_exec(*command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        # # if process.stdout is not None:
+        # #     async for line in process.stdout:
+        #         progress_line = line.strip()
+        #         if line in progress_line:
+        #             print(line)
+        #             yield line
+        # await process.communicate()
+        # await process.wait()
 
-        # TESTING FOR ASYNC DOWNLOAD 
-
-
-
-
-        server_ulog = f'root@{ip_address}:{ulog_path}'
-        cmd = f'sshpass -p {password} scp -r'
-        command = [cmd, server_ulog, ulog_path_and_name]
-
-
-
+        # TESTING FOR ASYNC DOWNLOAD - using SCP - WORKS 
+        # server_ulog = f'root@{ip_address}:{ulog_path}'
+        # cmd = f'sshpass -p {password} scp -r'
+        # command = [cmd, server_ulog, ulog_path_and_name]
         sshpass_command = ['sshpass', '-p', 'oelinux123', 'scp', '-r', server_ulog, ulog_path_and_name]
         process = await asyncio.create_subprocess_exec(*sshpass_command)
+        # Check what process. has that can be used for progress bar
         await process.wait()
 
         # Kill the process above, required so that process can be used again with another ulog
-        os.kill(process.pid, signal.SIGTERM)
+        # os.kill(process.pid, signal.SIGTERM)
 
 
 
@@ -124,6 +133,21 @@ async def download_log(drone, index):
     #     print()
 
     return ulog_path_and_name
+
+# async def rsync_download(source, destination):
+#         print("rsync_download function")
+#         # TESTING RSYNC for progress bar 
+#         # server_ulog = f'root@{ip_address}:{ulog_path}'
+#         command = sshpass_command = ['sshpass', '-p', 'oelinux123', 'scp', '-r', source, destination]
+#         # command = ['rsync', '-r', '--progress', '-e', 'ssh', source, destination]
+#         process = await asyncio.subprocess.create_subprocess_exec(*command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+#         if process.stdout is not None:
+#             async for line in process.stdout:
+#                 progress_line = line.strip()
+#                 if line in progress_line:
+#                     print(line)
+#                     yield line
+#         await process.communicate()
 
 
 async def rename_file(entry):
