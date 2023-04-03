@@ -6,6 +6,8 @@ Components for the GUI layout
 
 import PySimpleGUI as sg
 
+import constants
+
 sg.theme('DarkTeal6')
 
 
@@ -45,25 +47,14 @@ file_view = [
 
 # Messages for user, status updates
 status_view = [
-    [sg.Text('All files saved in ../Downloads/FlightLogs/', visible=True, key='-SAVE LOC-')], 
-    [sg.Text('Status...', visible= True,)],
-    
-]
-
-#Currenlty not used after switching to scp downloading.
-progress_bar= [
-    [sg.ProgressBar(100, orientation='h', bar_color=('blue', 'white'), expand_x=True, size=(40, 20),  key='-PBAR-')],
-    [
-        sg.Text('', key='-OUT-', enable_events=True, font=('Arial Bold', 12), justification='left'),
-        sg.Text('%', font=('Arial Bold', 12), justification='left'),
-    ]
+    [sg.Text('All files saved in ..' + constants.DOWNLOADS_PATH, visible=True, key='-SAVE LOC-')], 
+    [sg.Text('Status...', visible= True,)],    
 ]
 
 # Display user friendly messages
 busy = [
-    # [sg.Text('Downloading in progress...please wait', visible=False, key = '-DOWNLOADING-')],
-    [sg.Text('Download starting...please wait...', visible=False, key = '-STATUS-')],
-    # [sg.Image(filename = 'flightlogs/assets/busy.gif', visible=False, key="-BUSY-")]
+    [sg.Text('Download in progress...', size=(30,2), visible=False, key = '-STATUS-')],
+    [sg.Text("Download complete.", size=(30,2), visible=False, key='-DONE-' )]
 ]
 
 # create the layout for the gui
@@ -74,8 +65,8 @@ layout_vert = [
         sg.Column(file_view, size=(300, 300), vertical_alignment = 'top'),
     ],
     [ sg.HorizontalSeparator() ],
-    [ sg.Column(status_view, size=(400, 100)) ],
-    [ sg.Column(busy,  size=(400, 100))],
+    [ sg.Column(status_view, size=(400, 50)) ],
+    [ sg.Column(busy,  size=(400, 75))],
 ]
 
 

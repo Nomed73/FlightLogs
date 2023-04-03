@@ -20,6 +20,7 @@ import layout.layout_vert as lt
 import logs.flightreview as fr
 
 
+
 async def main():
     # create the layout for the gui
     window = sg.Window("Drone Connect", 
@@ -33,11 +34,29 @@ async def main():
     drone = await cd.connect_drone()
     await fr.run(drone)
 
+    async def locate_log():
+        # Update status window and return ulog to download
+        
+        window['-STATUS-'].update(visible=True)
+        window['-DONE-'].update(visible = False)
+        window.refresh()
+        selected_item = values['-LOG LIST-'][0]
+        return logs.index(selected_item)
+
+    async def update_window():
+        # Update status window after download of file.
+            
+        window['-STATUS-'].update(visible = False)
+        window['-DONE-'].update(visible = True)
+        window.refresh()
+        
+
     while True:
         event, values = window.read() # type: ignore
         
         if event == "-EXIT-" or event == sg.WIN_CLOSED:
             #Kills any possible running processes before exiting
+            
             processes = psutil.process_iter()
             for process in processes:
                 description = str(process.cmdline())
@@ -52,8 +71,8 @@ async def main():
 
         if event == '-CONNECT-':
             #Connect the drone and list the files on the drone and enable buttons.
+            
             logs = await fr.entries_to_list() 
-            print(f'logs = {logs}')
             window['-LOG LIST-'].update(values = logs)
             window['-SAVE LOG-'].update(disabled = False)
             window['-TO CSV-'].update(disabled = False)
@@ -63,34 +82,31 @@ async def main():
 
         elif event == '-SAVE LOG-':
             # Save selected ulog
-            selected_item = values['-LOG LIST-'][0]
-            index_log = logs.index(selected_item)
-            print('index_log = ', index_log, "index_log type = ", type(index_log))
-            window['-SAVE LOG-'].update(visible=True)
-            window['-STATUS-'].update(visible = True)
-            log = await fr.download_log(drone, index_log)
-            window['-STATUS-'].update("Download complete")
+            
+            index_log = await locate_log()
+            await fr.download_log(drone, index_log)
+            await update_window()
             
         elif event == '-TO CSV-':
             # Download selected ulog to csv - vehicle_attitude message only
-            selected_item = values['-LOG LIST-'][0]
-            index_log = logs.index(selected_item)
-            window['-SAVE LOG-'].update(visible=True)
+            
+            index_log = await locate_log()
             await fr.create_csv(drone, index_log)
+            await update_window()
             
         elif event == '-TO JSON-':
             # Download selected ulog to csv - vehicle_attitude message only
-            selected_item = values['-LOG LIST-'][0]
-            index_log = logs.index(selected_item)
-            window['-SAVE LOG-'].update(visible=True)
+            
+            index_log = await locate_log()
             await fr.create_json(drone, index_log)
+            await update_window()
             
         elif event == '-FLIGHT REVIEW-':
-            #TODO - The next two lines of code are being repeated
-            selected_item = values['-LOG LIST-'][0]
-            index_log = logs.index(selected_item)
+            #Send ulog to Flight Review app for graphical display of data
+            
+            index_log = await locate_log() 
             window['-CHECK BROWSER-'].update(visible=True)
-            result = await fr.upload_to_flight_review(drone, index_log)
+            await fr.upload_to_flight_review(drone, index_log)
 
     window.close()
 
