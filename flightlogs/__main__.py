@@ -67,8 +67,9 @@ async def main():
             index_log = logs.index(selected_item)
             print('index_log = ', index_log, "index_log type = ", type(index_log))
             window['-SAVE LOG-'].update(visible=True)
+            window['-STATUS-'].update(visible = True)
             log = await fr.download_log(drone, index_log)
-            window['-DONE-'].update(visible=True)
+            window['-STATUS-'].update("Download complete")
             
         elif event == '-TO CSV-':
             # Download selected ulog to csv - vehicle_attitude message only

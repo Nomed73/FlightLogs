@@ -46,7 +46,7 @@ file_view = [
 # Messages for user, status updates
 status_view = [
     [sg.Text('All files saved in ../Downloads/FlightLogs/', visible=True, key='-SAVE LOC-')], 
-    [sg.Text('Download status...', visible= False, key="-DOWNLOAD STATUS-")],
+    [sg.Text('Status...', visible= True,)],
     
 ]
 
@@ -62,7 +62,7 @@ progress_bar= [
 # Display user friendly messages
 busy = [
     # [sg.Text('Downloading in progress...please wait', visible=False, key = '-DOWNLOADING-')],
-    [sg.Text('Download DONE', visible=False, key = '-DONE-')],
+    [sg.Text('Download starting...please wait...', visible=False, key = '-STATUS-')],
     # [sg.Image(filename = 'flightlogs/assets/busy.gif', visible=False, key="-BUSY-")]
 ]
 
