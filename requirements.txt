@@ -6,3 +6,5 @@ mavsdk==1.4.2
 numpy==1.24.1
 protobuf==3.20.1
 pymavlink==2.4.37
+PySimpleGUI==4.60.4
+pyulog
