@@ -41,7 +41,7 @@ After running the python3 setup_db.py as per the instructions, please make a not
 Before the first use:
 - Open the constants.py file and update the information there. 
 - Activate the virtual environment.
-- Open flightlogs and run __main__.py
+- Open flightlogs and run _main_.py
 - Click Connect Drone
 
 
