@@ -27,7 +27,11 @@ Generally, the following order is the most appropriated.
 
 All installed dependencies at step 5 will be unavailable after you leave virtual environment.
 
-After running the python3 setup_db.py as per the instructions, please make a note of the absolute path to flight_review/app. This path is necessary in FlightLogs
+After running the 
+'''
+python3 setup_db.py
+''' 
+as per the instructions, please make a note of the absolute path to flight_review/app. This path is necessary in FlightLogs
 
 
 ## FlightLogs
