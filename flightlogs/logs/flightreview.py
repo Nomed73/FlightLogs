@@ -3,6 +3,9 @@
 '''
 
 '''
+'''
+
+'''
 
 
 import os
@@ -13,6 +16,7 @@ import json
 import pytz
 import asyncio
 import datetime
+# import signal
 import operator
 import subprocess
 
@@ -87,6 +91,8 @@ async def download_log(drone, index):
 async def rename_file(entry):
     #renames ulog for consistency 
 
+    #renames ulog for consistency 
+
     date_without_colon = entry.date.replace(":", "-")
     filename = f"log-1-{date_without_colon}.ulg"
     filename = filename.replace('T','-')
@@ -95,6 +101,8 @@ async def rename_file(entry):
 
 
 async def create_csv(drone, index):
+    # Creates and downloads a csv document that includes the message_to_download data
+
     # Creates and downloads a csv document that includes the message_to_download data
 
     filename = await download_log(drone, index)
@@ -142,6 +150,8 @@ async def get_csv_path(filename):
 async def upload_to_flight_review(drone, index):
     # Downloads the selected ulog and displays the data in local build of Flight Review.
     # flight_review_directory path to local installation path
+    # Downloads the selected ulog and displays the data in local build of Flight Review.
+    # flight_review_directory path to local installation path
 
     curr_dir = os.getcwd()
     filename = await download_log(drone, index)
@@ -154,6 +164,8 @@ async def upload_to_flight_review(drone, index):
 
 # TODO: Have to find the right spot to put this, so that names have CST
 async def zulu_to_cst(zulu_time_str):
+    # Converts zulu time zone to central time zone.
+
     # Converts zulu time zone to central time zone.
 
     print(f'Zulu time: {zulu_time_str}')
