@@ -41,8 +41,11 @@ After running the python3 setup_db.py as per the instructions, please make a not
 Before the first use:
 - Open the constants.py file and update the information there. 
 - Activate the virtual environment.
-- Open flightlogs and run _main_.py
+- Open flightlogs and run '_main_.py'
 - Click Connect Drone
+- Choose any of the option
+
+Flight Review will run on your default browser. It was tested in Firefox Developer edition.
 
 
 # Issues
