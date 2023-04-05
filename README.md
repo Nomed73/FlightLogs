@@ -27,16 +27,26 @@ Generally, the following order is the most appropriated.
 
 All installed dependencies at step 5 will be unavailable after you leave virtual environment.
 
-After running the 
-'''
-python3 setup_db.py
-''' 
-as per the instructions, please make a note of the absolute path to flight_review/app. This path is necessary in FlightLogs
+After running the python3 setup_db.py as per the instructions, please make a note of the absolute path to flight_review/app. This path is necessary in FlightLogs
 
 
-## FlightLogs
- - Prepare directory for Project
+## Install FlightLogs
+ - Prepare directory to clone the FlightLogs repository
  - cd into the directory
- - create a virtual environment. (see above)
- - run pip3 install -r requirements.txt
+ - Create a virtual environment. (see above)
+ - Run pip3 install -r requirements.txt
+
+## Using FlightLogs
+
+Before the first use:
+- Open the constants.py file and update the information there. 
+- Activate the virtual environment.
+- Open flightlogs and run __main__.py
+- Click Connect Drone
+
+
+# Issues
+If there are any issues please submit them and I will fix as soon as I can.
+
+Thanks. 
 
