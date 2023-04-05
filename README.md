@@ -1,29 +1,21 @@
 # FlightLogs
 
+A GUI interface to connect to the VOXL2/PX4 and be able to :
+- download ulogs
+- convert ulogs to csv
+- convert csv to json
+- view ulog in local Flight Review 
+
+The csv and the JSON files are only for one message of the ulogs. Currently the data for the message '-m vehicle_attitude ' is downloaded. This message can be changed in the constants.py file. If there is enough interest or demand, a selection menu can be added so that the user can select which message data to download. 
 
 
+# Prerequisite 
+## Install Flight Review
 
+Follow the Installation and Setup instructions here: https://github.com/PX4/flight_review
+Preferably install the requirements.txt in a virtual environment. 
 
-
-#1 Prepare directory for Project
-Crate a directory for the project. This directory will 
-
-Installing Depencies:
-pip3 install -r requirements.txt
-
-Folders
-data - storage for any data that some of the files may download, such as flight logs, teletemtry data, or custom data from the drone
-
-telemetry - scripts that read telemetry data from drone
-
-logs - scripts that download logs from the drone
-
-missions - scripts for drone missions
-
-drone - script to connect to drone
-
-
-# Install virtual environment
+### Install virtual environment
 Generally, the following order is the most appropriated.
 
     $ git clone <Project A>  # Cloning project repository
@@ -34,3 +26,13 @@ Generally, the following order is the most appropriated.
     (my_venv)$ deactivate # When you want to leave virtual environment
 
 All installed dependencies at step 5 will be unavailable after you leave virtual environment.
+
+After running the python3 setup_db.py as per the instructions, please make a note of the absolute path to flight_review/app. This path is necessary in FlightLogs
+
+
+## FlightLogs
+ - Prepare directory for Project
+ - cd into the directory
+ - create a virtual environment. (see above)
+ - run pip3 install -r requirements.txt
+
