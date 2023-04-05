@@ -1,50 +1,77 @@
 #!/home/nm/dev/FlightLogs/venv python3
-# usr/bin/env python3
 
-# Download the ulog of the last drone (or simulator) flight
-# and and display the data using FreeFlight App
+'''
+Display the ulog files for a connected drone. 
+User selects a file and has the option to 
+1. download ulog
+2. download csv of vehicle_attitude message data
+3. download json of vehicle_attitude message data
+4. view ulog data in a local build of Flight Review
+'''
+
+
 import asyncio
-import subprocess
+import psutil
+
 import PySimpleGUI as sg
+
+import drone.connect_drone as cd
 import layout.layout_vert as lt
 import logs.flightreview as fr
-import drone.connect_drone as cd
 
-from pathlib import Path
-
-
-async def launch_px4():
-    # Launch the PX4 simulator
-    px4_directory = '/home/nm/dev/PX4-Autopilot'
-    run_px4 = f'cd {px4_directory} && HEADLESS=1 make px4_sitl jmavsim'
-    px4_process = subprocess.call(['gnome-terminal', '--', 'bash', '-c', run_px4])
-    return px4_process
 
 
 async def main():
     # create the layout for the gui
     window = sg.Window("Drone Connect", 
                         lt.layout_vert,
-                        size=(800,400), 
-                        margins=(25, 25), 
+                        size=(800,600), 
+                        margins=(15, 15), 
                         resizable=True, 
                         element_justification='left')
 
-    # # Verify that the px4 and sim are running
-    # if await launch_px4() == 0:
-    #     drone = await cd.connect_drone()
-    # else:
-    #     print('drone not connected')
+    # Connect to drone - Initiate before window creation.
+    drone = await cd.connect_drone()
+    await fr.run(drone)
+
+    async def locate_log():
+        # Update status window and return ulog to download
+        
+        window['-STATUS-'].update(visible=True)
+        window['-DONE-'].update(visible = False)
+        window.refresh()
+        selected_item = values['-LOG LIST-'][0]
+        return logs.index(selected_item)
+
+    async def update_window():
+        # Update status window after download of file.
+            
+        window['-STATUS-'].update(visible = False)
+        window['-DONE-'].update(visible = True)
+        window.refresh()
+        
 
     while True:
-        event, values = window.read()
-
+        event, values = window.read() # type: ignore
+        
         if event == "-EXIT-" or event == sg.WIN_CLOSED:
+            #Kills any possible running processes before exiting
+            
+            processes = psutil.process_iter()
+            for process in processes:
+                description = str(process.cmdline())
+                try:
+                    if "PX4" in description: process.kill()
+                    if "jmavsim" in description: process.kill()
+                    if "FlightLogs" in description: process.kill()
+                    if "scp" in description: process.kill()
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    pass
             break
-    
-        if event == '-SHOW LOGS-':
-            # await fr.test_update_window(window)
-            await fr.run(drone)
+
+        if event == '-CONNECT-':
+            #Connect the drone and list the files on the drone and enable buttons.
+            
             logs = await fr.entries_to_list() 
             window['-LOG LIST-'].update(values = logs)
             window['-SAVE LOG-'].update(disabled = False)
@@ -52,52 +79,37 @@ async def main():
             window['-TO JSON-'].update(disabled = False)
             window['-FLIGHT REVIEW-'].update(disabled = False)
             window['-ULOGS-'].update(visible=True)
-        
+
         elif event == '-SAVE LOG-':
-            selected_item = values['-LOG LIST-'][0]
-            index_log = logs.index(selected_item)
-            log = await fr.download_log(drone, index_log)
-
+            # Save selected ulog
+            
+            index_log = await locate_log()
+            await fr.download_log(drone, index_log)
+            await update_window()
+            
         elif event == '-TO CSV-':
-            selected_item = values['-LOG LIST-'][0]
-            index_log = logs.index(selected_item)
+            # Download selected ulog to csv - vehicle_attitude message only
+            
+            index_log = await locate_log()
             await fr.create_csv(drone, index_log)
-            pass 
-
+            await update_window()
+            
         elif event == '-TO JSON-':
-            selected_item = values['-LOG LIST-'][0]
-            index_log = logs.index(selected_item)
+            # Download selected ulog to csv - vehicle_attitude message only
+            
+            index_log = await locate_log()
             await fr.create_json(drone, index_log)
-            pass
-
+            await update_window()
+            
         elif event == '-FLIGHT REVIEW-':
-            #TODO Remove the print line
-            print("Flight Review initiated...")
-
-            #TODO - The next two lines of code are being repeated
-            selected_item = values['-LOG LIST-'][0]
-            index_log = logs.index(selected_item)
+            #Send ulog to Flight Review app for graphical display of data
+            
+            index_log = await locate_log() 
             window['-CHECK BROWSER-'].update(visible=True)
-            # await fr.upload_to_flight_review(drone, index_log)
-            result = await fr.upload_to_flight_review(drone, index_log)
-            print(result)
-            # if enable_notice:
-            #     window['-CHECK BROWSER-'].update(visible=True)
-
-        # elif event == '-DELETE LOGS-':
-        #     await drone.log_files.erase_all_log_files()
-        #     # logs = await fr.entries_to_list(drone) 
-        #     logs = [[]]
-        #     window['-LOG LIST-'].update(values = logs)
-        #     # pass   
-
-        # Run the asyncio loop
-        # asyncio.run(fr.run(drone))
-
-    # else:
-    #     print('Connecting to drone failed.')
+            await fr.upload_to_flight_review(drone, index_log)
 
     window.close()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
